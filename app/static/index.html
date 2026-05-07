@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SellerSprite Lite 控制台</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="background-glow background-glow-left"></div>
+    <div class="background-glow background-glow-right"></div>
+
+    <main class="page-shell">
+      <section class="hero-panel">
+        <div class="hero-copy-block">
+          <p class="eyebrow">SellerSprite Lite</p>
+          <h1>亚马逊关键词、商品与收藏工作台</h1>
+          <p class="hero-copy">
+            这一版把页面收成了更直接的工作流：在关键词库里直接采集，在商品库里筛选并收藏，想看价格历史时直接跳
+            Keepa 或 Camel。
+          </p>
+        </div>
+        <div class="hero-actions">
+          <button type="button" class="button button-primary" id="seedButton">导入演示数据</button>
+          <button type="button" class="button button-secondary" id="refreshAllButton">刷新全部数据</button>
+          <button type="button" class="button button-ghost" id="clearAllProductsButton">清空商品库</button>
+          <button type="button" class="button button-ghost" id="clearAllKeywordsButton">清空关键词库</button>
+          <button type="button" class="button button-ghost" id="clearAllCompetitorsButton">清空旧竞品库</button>
+        </div>
+      </section>
+
+      <section class="stats-grid">
+        <article class="stat-card">
+          <span>商品库</span>
+          <strong id="statProducts">0</strong>
+          <small>当前累计商品数</small>
+        </article>
+        <article class="stat-card">
+          <span>关键词库</span>
+          <strong id="statKeywords">0</strong>
+          <small>已建立的关键词任务</small>
+        </article>
+        <article class="stat-card">
+          <span>收藏夹</span>
+          <strong id="statCompetitors">0</strong>
+          <small>当前已收藏商品</small>
+        </article>
+        <article class="stat-card">
+          <span>平均价格</span>
+          <strong id="statAvgPrice">0</strong>
+          <small>商品库平均价格</small>
+        </article>
+        <article class="stat-card">
+          <span>平均评分</span>
+          <strong id="statAvgRating">0</strong>
+          <small>商品库平均口碑</small>
+        </article>
+        <article class="stat-card">
+          <span>活跃关键词</span>
+          <strong id="statFavorites">0</strong>
+          <small>当前启用中的关键词数</small>
+        </article>
+      </section>
+
+      <section class="notice-board">
+        <div class="notice-title">
+          <strong>系统消息</strong>
+          <span id="taskMessage">等待操作。</span>
+        </div>
+      </section>
+
+      <section class="grid-two aligned-top">
+        <article class="card">
+          <div class="section-title">
+            <div>
+              <h2>关键词库</h2>
+              <p>关键词建好之后，直接在列表里点“采集”就可以，不再单独放一个采集板块。</p>
+            </div>
+          </div>
+
+          <form id="keywordForm" class="toolbar-grid keyword-grid">
+            <label>
+              <span>关键词</span>
+              <input id="keywordName" type="text" placeholder="例如 magnetic screwdriver" required />
+            </label>
+            <label>
+              <span>站点</span>
+              <select id="keywordMarketplace">
+                <option value="com">amazon.com</option>
+                <option value="co.uk">amazon.co.uk</option>
+                <option value="de">amazon.de</option>
+                <option value="co.jp">amazon.co.jp</option>
+              </select>
+            </label>
+            <label>
+              <span>类目参数</span>
+              <select id="keywordDepartment"></select>
+            </label>
+            <label>
+              <span>优先级</span>
+              <select id="keywordPriority">
+                <option value="5">5</option>
+                <option value="4">4</option>
+                <option value="3" selected>3</option>
+                <option value="2">2</option>
+                <option value="1">1</option>
+              </select>
+            </label>
+            <label class="span-2">
+              <span>备注</span>
+              <input id="keywordNote" type="text" placeholder="例如：主推父词，准备长期跟踪" />
+            </label>
+            <label>
+              <span>采集数量</span>
+              <input id="keywordTargetProducts" type="number" min="10" max="200" value="100" />
+            </label>
+            <div class="toolbar-actions">
+              <button type="submit" class="button button-primary">新增关键词</button>
+            </div>
+          </form>
+
+          <div class="table-wrap section-scroll compact-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>关键词</th>
+                  <th>站点</th>
+                  <th>优先级</th>
+                  <th>状态</th>
+                  <th>最近采集</th>
+                  <th>备注</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="keywordTableBody"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="section-title">
+            <div>
+              <h2>收藏夹</h2>
+              <p>这里展示你在商品库里点过“收藏”的商品。想看价格历史时，直接打开 Keepa 或 Camel 即可。</p>
+            </div>
+            <div class="row-actions">
+              <button type="button" class="button button-ghost" id="clearScrapeRunsButton">清空采集记录</button>
+            </div>
+          </div>
+
+          <div class="favorites-tip">
+            <strong>使用方式</strong>
+            <span>先在商品库里筛选，再点“收藏”。收藏夹会自动同步，不需要单独加入监控。</span>
+          </div>
+
+          <div id="favoriteBoard" class="favorites-board section-scroll"></div>
+        </article>
+      </section>
+
+      <section class="card">
+        <div class="section-title">
+          <div>
+            <h2>情报看板</h2>
+            <p>快速看最近采集了哪些词、哪些词出货多，以及当前商品状态分布。</p>
+          </div>
+        </div>
+
+        <div class="mini-panels">
+          <div class="mini-panel">
+            <h3>高价值关键词</h3>
+            <div id="topKeywordsList" class="stack-list"></div>
+          </div>
+          <div class="mini-panel">
+            <h3>最近采集记录</h3>
+            <div id="recentRunsList" class="stack-list"></div>
+          </div>
+          <div class="mini-panel span-2">
+            <h3>商品状态分布</h3>
+            <div id="statusBreakdownList" class="status-breakdown"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-title">
+          <div>
+            <h2>AI 分析</h2>
+            <p>接入 DeepSeek 后，可以直接分析商品库、收藏夹和关键词库，快速得到运营建议。</p>
+          </div>
+        </div>
+
+        <div class="ai-grid">
+          <form id="aiSettingsForm" class="ai-settings-card">
+            <h3>DeepSeek 设置</h3>
+            <label>
+              <span>API Key</span>
+              <input id="aiApiKey" type="password" placeholder="输入 DeepSeek API Key（仅本次运行有效）" />
+            </label>
+            <label>
+              <span>模型</span>
+              <select id="aiModel">
+                <option value="deepseek-v4-flash">deepseek-v4-flash</option>
+                <option value="deepseek-v4-pro">deepseek-v4-pro</option>
+                <option value="deepseek-chat">deepseek-chat</option>
+                <option value="deepseek-reasoner">deepseek-reasoner</option>
+              </select>
+            </label>
+            <div class="meta-text" id="aiSettingsMeta">本次运行尚未填写 DeepSeek Key</div>
+            <div class="toolbar-actions">
+              <button type="submit" class="button button-primary">应用本次 AI 设置</button>
+              <button type="button" class="button button-ghost" id="clearAiSettingsButton">清空本次 AI 设置</button>
+            </div>
+          </form>
+
+          <form id="aiAnalyzeForm" class="ai-analyze-card">
+            <h3>分析面板</h3>
+            <label>
+              <span>分析范围</span>
+              <select id="aiScope">
+                <option value="favorites">收藏夹</option>
+                <option value="products">商品库</option>
+                <option value="keywords">关键词库</option>
+              </select>
+            </label>
+            <label>
+              <span>你想让 AI 重点看什么</span>
+              <textarea id="aiQuestion" placeholder="例如：帮我找出最值得优先跟进的 5 个商品，并说明原因"></textarea>
+            </label>
+            <div class="toolbar-actions">
+              <button type="submit" class="button button-secondary" id="runAiAnalysisButton">开始 AI 分析</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="ai-output-card">
+          <div class="section-title">
+            <div>
+              <h3>AI 结果</h3>
+              <p id="aiResultMeta">还没有分析结果</p>
+            </div>
+          </div>
+          <div id="aiResult" class="ai-result prose-like">
+            可以先输入本次会话的 API Key，再选择“收藏夹 / 商品库 / 关键词库”开始分析。
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-title">
+          <div>
+            <h2>商品库</h2>
+            <p>支持搜索、筛选、收藏、状态管理、备注、排序，以及一键跳到外部价格历史页。</p>
+          </div>
+          <div class="pager">
+            <button type="button" id="sortDrawerToggle" class="button button-secondary">排序抽屉</button>
+            <button type="button" id="prevPage" class="button button-ghost">上一页</button>
+            <span id="pageText">第 1 页</span>
+            <button type="button" id="nextPage" class="button button-ghost">下一页</button>
+          </div>
+        </div>
+
+        <form id="filterForm" class="toolbar-grid product-filter-grid">
+          <label>
+            <span>搜索</span>
+            <input type="text" id="searchQuery" placeholder="标题 / ASIN / 品牌 / 备注" />
+          </label>
+          <label>
+            <span>状态</span>
+            <select id="statusFilter">
+              <option value="">全部状态</option>
+              <option value="new">new</option>
+              <option value="tracking">tracking</option>
+              <option value="follow_up">follow_up</option>
+              <option value="archived">archived</option>
+            </select>
+          </label>
+          <label>
+            <span>站点</span>
+            <select id="filterMarketplace">
+              <option value="">全部站点</option>
+              <option value="com">amazon.com</option>
+              <option value="co.uk">amazon.co.uk</option>
+              <option value="de">amazon.de</option>
+              <option value="co.jp">amazon.co.jp</option>
+            </select>
+          </label>
+          <label>
+            <span>关键词</span>
+            <select id="keywordFilter">
+              <option value="">全部关键词</option>
+            </select>
+          </label>
+          <label>
+            <span>最小价格</span>
+            <input type="number" id="minPrice" min="0" step="0.01" />
+          </label>
+          <label>
+            <span>最大价格</span>
+            <input type="number" id="maxPrice" min="0" step="0.01" />
+          </label>
+          <label class="inline-check">
+            <input type="checkbox" id="onlyFavorites" />
+            <span>只看收藏</span>
+          </label>
+          <div class="toolbar-actions">
+            <button type="submit" class="button button-primary">应用筛选</button>
+          </div>
+        </form>
+
+        <p class="meta-text" id="tableMeta">共 0 条记录</p>
+
+        <div class="table-wrap section-scroll tall-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>商品</th>
+                <th>市场信息</th>
+                <th>表现参数</th>
+                <th>状态</th>
+                <th>备注</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="productTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <div id="sortDrawerBackdrop" class="drawer-backdrop" hidden></div>
+    <aside id="sortDrawer" class="drawer-panel" aria-hidden="true">
+      <div class="drawer-header">
+        <div>
+          <h3>商品排序抽屉</h3>
+          <p>为商品库切换不同排序逻辑，方便你从不同角度找重点商品。</p>
+        </div>
+        <button type="button" class="button button-ghost" id="sortDrawerClose">关闭</button>
+      </div>
+
+      <form id="sortDrawerForm" class="drawer-form">
+        <label>
+          <span>排序方式</span>
+          <select id="sortBy">
+            <option value="comprehensive">综合排序</option>
+            <option value="opportunity_score">机会分排序</option>
+            <option value="estimated_sales">销量排序（评论数近似）</option>
+            <option value="review_count">评论数排序</option>
+            <option value="rating">评分排序</option>
+            <option value="price">价格排序</option>
+            <option value="source_rank">搜索排名排序</option>
+            <option value="newest">最新采集排序</option>
+            <option value="updated">最近更新排序</option>
+            <option value="favorite">收藏优先排序</option>
+            <option value="prime">Prime 优先排序</option>
+          </select>
+        </label>
+
+        <label>
+          <span>排序方向</span>
+          <select id="sortOrder">
+            <option value="desc">降序</option>
+            <option value="asc">升序</option>
+          </select>
+        </label>
+
+        <div class="drawer-note">
+          <strong id="sortDescriptionTitle">综合排序</strong>
+          <p id="sortDescriptionBody">
+            综合排序会结合机会分、评分、评论量、Prime、广告状态和收藏标记，优先把更值得你先看的商品排到前面。
+          </p>
+        </div>
+
+        <div class="drawer-note">
+          <strong>详细排序说明</strong>
+          <div class="drawer-list">
+            <span>综合排序：综合机会分、评分、评论量、Prime、广告情况和收藏状态。</span>
+            <span>机会分排序：优先看系统判断更有操作空间的商品。</span>
+            <span>销量排序：当前用评论数近似估算热度，适合先看更热门的商品。</span>
+            <span>评分排序：适合优先找口碑高的商品。</span>
+            <span>价格排序：适合先看高客单价或低价格带商品。</span>
+            <span>搜索排名排序：适合先看关键词结果页更靠前的商品。</span>
+            <span>最新采集排序：适合看刚抓回来的最新结果。</span>
+            <span>最近更新排序：适合看最近改过备注、状态或重新入库的商品。</span>
+            <span>收藏优先排序：优先显示你已标记的重点商品。</span>
+            <span>Prime 优先排序：优先看带 Prime 的商品。</span>
+          </div>
+        </div>
+
+        <div class="toolbar-actions">
+          <button type="button" class="button button-ghost" id="sortResetButton">重置排序</button>
+          <button type="submit" class="button button-primary">应用排序</button>
+        </div>
+      </form>
+    </aside>
+
+    <template id="emptyStateTemplate">
+      <div class="empty-state">
+        <strong>当前还没有数据</strong>
+        <p>可以先导入演示数据，或者先建立关键词后再触发采集。</p>
+      </div>
+    </template>
+
+    <script src="/static/app.js" defer></script>
+  </body>
+</html>
